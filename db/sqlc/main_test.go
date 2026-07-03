@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("Cannot get the file: ", err)
 	}
-	testDB, err := sql.Open(config.DBDriver, config.DBSource)
+	testDB, err = sql.Open(config.DBDriver, config.DBSource)
 	if err != nil {
 		log.Fatal("cannot connect to the DB: ", err)
 	}
