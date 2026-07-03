@@ -30,3 +30,5 @@ func createRandomAccount(t *testing.T) Account {
 func TestCreateAccount(t *testing.T) {
 	createRandomAccount(t)
 }
+
+// TODO: Add rest of the tests of account
