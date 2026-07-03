@@ -1,10 +1,9 @@
 -- name: CreateAccount :one
 INSERT INTO accounts(
 owner,
-balance,
-currency
+balance
 ) VALUES(
- $1,$2,$3
+ $1,$2
 ) RETURNING *;
 
 -- name: GetAccount :one
