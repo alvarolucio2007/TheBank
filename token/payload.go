@@ -12,3 +12,5 @@ type Payload struct {
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
+
+func NewPayload(username string)
