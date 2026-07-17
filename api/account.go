@@ -7,7 +7,9 @@ import (
 
 	db "github.com/alvarolucio2007/TheBank/db/sqlc"
 	"github.com/gin-gonic/gin"
+	_ "github.com/gin-gonic/gin"
 	"github.com/lib/pq"
+	_ "github.com/lib/pq"
 )
 
 type createAccountRequest struct {
@@ -33,8 +35,10 @@ func (server *Server) createAccount(ctx *gin.Context) {
 				return
 			}
 		}
-		ctx.JSON(http.StatusOK, account)
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
 	}
+	ctx.JSON(http.StatusOK, account)
 }
 
 type getAccountRequest struct {
@@ -78,6 +82,7 @@ func (server *Server) listAccount(ctx *gin.Context) {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
 		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
