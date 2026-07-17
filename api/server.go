@@ -10,22 +10,35 @@ type Server struct {
 	router *gin.Engine
 }
 
-func NewServer(store db.Store) *Server {
+func NewServer(store db.Store) (*Server, error) {
 	server := &Server{store: store}
 	router := gin.Default()
-	router.POST("/accounts", server.createAccount)
-	router.GET("/accounts/:id", server.getAccount)
-	router.GET("/accounts", server.listAccount)
-	router.DELETE("/accounts/:id", server.deleteAccount)
-	router.PATCH("/accounts/:id", server.updateAccount)
 	server.router = router
-	return server
+	server.setupRouter()
+	return server, nil
 }
 
 func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }
 
+func (server *Server) setupRouter() {
+	router := gin.Default()
+
+	router.POST("/users", server.createUser)
+
+	router.POST("/accounts", server.createAccount)
+	router.GET("/accounts/:id", server.getAccount)
+	router.GET("/accounts", server.listAccount)
+
+	router.POST("/transfers", server.createTransfer)
+
+	server.router = router
+}
+
 func errorResponse(err error) gin.H {
+	if err == nil {
+		return gin.H{"error": "unknown error"}
+	}
 	return gin.H{"error": err.Error()}
 }
