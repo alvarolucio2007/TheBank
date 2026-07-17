@@ -12,4 +12,6 @@ testrace:
 	go test -v -cover -race ./...
 server:
 	go run main.go
-.PHONY: migrateup migratedown sqlc test testrace server
+mock:
+	mockgen -package mockdb -destination db/mock/store.go github.com/alvarolucio2007/TheBank/db/sql Store
+.PHONY: migrateup migratedown sqlc test testrace server mock
