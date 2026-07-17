@@ -57,8 +57,7 @@ func TestTransferAPI(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server, err := NewServer(store)
-			require.NoError(t, err)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			url := "/transfers"
 			body := db.CreateTransferParams{
