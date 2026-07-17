@@ -88,7 +88,8 @@ func TestGetAccountAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server, err := NewServer(store)
+			require.NoError(t, err)
 			recorder := httptest.NewRecorder()
 
 			url := fmt.Sprintf("/accounts/%d", tc.accountID)
@@ -101,8 +102,6 @@ func TestGetAccountAPI(t *testing.T) {
 	}
 }
 
-/* FIXME: /OK and /InternalError has issues. Fix ASAP :)
- */
 func TestCreateAccountAPI(t *testing.T) {
 	account := randomAccountCreate()
 	testCases := []struct {
@@ -111,6 +110,13 @@ func TestCreateAccountAPI(t *testing.T) {
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
+		{
+			name:       "Invalid JSON",
+			buildStubs: func(store *mockdb.MockStore) {},
+			checkResponse: func(t *testing.T, recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusBadRequest, recorder.Code)
+			},
+		},
 		{
 			name:         "OK",
 			accountOwner: account.Owner,
@@ -162,7 +168,8 @@ func TestCreateAccountAPI(t *testing.T) {
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
 
-			server := NewServer(store)
+			server, err := NewServer(store)
+			require.NoError(t, err)
 			recorder := httptest.NewRecorder()
 
 			url := "/accounts"
@@ -173,6 +180,7 @@ func TestCreateAccountAPI(t *testing.T) {
 			require.NoError(t, err)
 			request, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(bodyJSON))
 			require.NoError(t, err)
+			request.Header.Set("Content-Type", "application/json")
 
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
@@ -220,7 +228,8 @@ func TestListAccountAPI(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server := NewServer(store)
+			server, err := NewServer(store)
+			require.NoError(t, err)
 			recorder := httptest.NewRecorder()
 			url := fmt.Sprintf("/accounts?page_id=%d&page_size=%d", tc.pageID, tc.pageSize)
 			body := db.ListAccountsParams{
