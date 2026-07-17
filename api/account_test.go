@@ -101,6 +101,8 @@ func TestGetAccountAPI(t *testing.T) {
 	}
 }
 
+/* FIXME: /OK and /InternalError has issues. Fix ASAP :)
+ */
 func TestCreateAccountAPI(t *testing.T) {
 	account := randomAccountCreate()
 	testCases := []struct {
