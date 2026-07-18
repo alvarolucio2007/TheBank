@@ -13,5 +13,5 @@ testrace:
 server:
 	go run main.go
 mock:
-	mockgen -package mockdb -destination db/mock/store.go github.com/alvarolucio2007/TheBank/db/sql Store
+	mockgen -package mockdb -destination db/mock/store.go github.com/alvarolucio2007/TheBank/db/sqlc Store
 .PHONY: migrateup migratedown sqlc test testrace server mock
