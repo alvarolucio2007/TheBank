@@ -6,21 +6,26 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	mockdb "github.com/alvarolucio2007/TheBank/db/mock"
 	db "github.com/alvarolucio2007/TheBank/db/sqlc"
+	"github.com/alvarolucio2007/TheBank/token"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
 
 func TestTransferAPI(t *testing.T) {
-	account1 := randomAccount()
-	account2 := randomAccount()
+	user1, _ := randomUser(t)
+	account1 := randomAccount(user1.Username)
+	user2, _ := randomUser(t)
+	account2 := randomAccount(user2.Username)
 	testCases := []struct {
 		name          string
 		account1ID    int64
 		account2ID    int64
 		amount        int64
+		setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
 		buildStubs    func(store *mockdb.MockStore)
 		checkResponse func(t *testing.T, recorder *httptest.ResponseRecorder)
 	}{
@@ -29,7 +34,15 @@ func TestTransferAPI(t *testing.T) {
 			account1ID: account1.ID,
 			account2ID: account2.ID,
 			amount:     account1.Balance,
+			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
+				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, user1.Username, time.Minute)
+			},
 			buildStubs: func(store *mockdb.MockStore) {
+				store.EXPECT().
+					GetAccount(gomock.Any(), gomock.Eq(account1.ID)).
+					Times(1).
+					Return(account1, nil)
+
 				arg := db.TransferTxParams{
 					FromAccountID: account1.ID,
 					ToAccountID:   account2.ID,
@@ -57,8 +70,7 @@ func TestTransferAPI(t *testing.T) {
 			defer ctrl.Finish()
 			store := mockdb.NewMockStore(ctrl)
 			tc.buildStubs(store)
-			server, err := NewServer(store)
-			require.NoError(t, err)
+			server := newTestServer(t, store)
 			recorder := httptest.NewRecorder()
 			url := "/transfers"
 			body := db.CreateTransferParams{
@@ -72,6 +84,7 @@ func TestTransferAPI(t *testing.T) {
 			require.NoError(t, err)
 			request.Header.Set("Content-Type", "application/json")
 
+			tc.setupAuth(t, request, server.tokenMaker)
 			server.router.ServeHTTP(recorder, request)
 			tc.checkResponse(t, recorder)
 		})
