@@ -7,7 +7,7 @@ POSTGRES_PORT=5432:5432
 
 #To build and create docker app FROM SCRATCH: Run docker_build->network->postgres->postgres_create_db->migrateup->docker_run
 network:
-	docker network create $(NETWORK_NAME) 
+	docker network create $(NETWORK_NAME) || true
 docker_build:
 	docker build -t thebank:latest .
 docker_run:
