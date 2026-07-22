@@ -1,9 +1,5 @@
-DB_HOST ?= localhost
-DB_URL = postgresql://root:secret@$(DB_HOST):5432/the_bank?sslmode=disable
-NETWORK_NAME=the_bank_network
-ENTRY_PORT=8080:8080
-POSTGRES_PORT=5432:5432
-
+include app.env
+export
 
 #To build and create docker app FROM SCRATCH: Run docker_build->network->postgres->postgres_create_db->migrateup->docker_run
 network:
@@ -17,9 +13,9 @@ postgres:
 postgres_create_db:
 	docker exec -it the_bank_db psql -U root -c "CREATE DATABASE the_bank;"
 migrateup:
-	migrate -path db/migration -database "$(DB_URL)" -verbose up
+	migrate -path db/migration -database "$(DB_SOURCE)" -verbose up
 migratedown:
-	migrate -path db/migration -database "$(DB_URL)" -verbose down
+	migrate -path db/migration -database "$(DB_SOURCE)" -verbose down
 sqlc:
 	sqlc generate
 test:
