@@ -38,5 +38,8 @@ jobs:
           which migrate
       - name: Run Migrations
         run: make migrateup
+        env:
+          DB_HOST: localhost
+          DB_URL: postgresql://root:secret@localhost:5432/the_bank?sslmode=disable
       - name: Test
         run: make test
