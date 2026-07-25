@@ -13,9 +13,9 @@ postgres:
 postgres_create_db:
 	docker exec -it the_bank_db psql -U root -c "CREATE DATABASE the_bank;"
 migrateup:
-	migrate -path db/migration -database "$(DB_SOURCE)" -verbose up
+	migrate -path db/migration -database "$(DB_URL)" -verbose up
 migratedown:
-	migrate -path db/migration -database "$(DB_SOURCE)" -verbose down
+	migrate -path db/migration -database "$(DB_URL)" -verbose down
 sqlc:
 	sqlc generate
 test:
