@@ -1,6 +1,8 @@
 include app.env
 export
 
+DB_URL = postgresql://root:secret@localhost:5432/the_bank?sslmode=disable
+
 #To build and create docker app FROM SCRATCH: Run docker_build->network->postgres->postgres_create_db->migrateup->docker_run
 network:
 	docker network create $(NETWORK_NAME) || true
@@ -9,13 +11,15 @@ docker_build:
 docker_run:
 	docker run --name thebank --network $(NETWORK_NAME) -p $(ENTRY_PORT) -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@the_bank_db:5432/the_bank?sslmode=disable" thebank:latest
 postgres:
-	docker run --name the_bank_db --network the_bank_network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:18-alpine
+	docker run --name the_bank_db --network the_bank_network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:18-alpine 
 postgres_create_db:
 	docker exec -it the_bank_db psql -U root -c "CREATE DATABASE the_bank;"
 migrateup:
-	migrate -path db/migration -database "$(DB_SOURCE)" -verbose up
+	migrate -path db/migration -database "$(DB_URL)" -verbose up
 migratedown:
-	migrate -path db/migration -database "$(DB_SOURCE)" -verbose down
+	migrate -path db/migration -database "$(DB_URL)" -verbose down
+migrateup-ci:
+	migrate -path db/migration -database "$(DB_URL_CI)" -verbose up
 sqlc:
 	sqlc generate
 test:
