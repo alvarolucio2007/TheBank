@@ -1,11 +1,10 @@
 #!/bin/sh
 set -e
 
-echo "Aguardando banco de dados"
-/app/wait-for.sh postgres:5432
+source app/app.env
 
-echo "Rodando migrações"
+echo "Running migrations"
 /app/migrate -path /app/migration -database "$DB_SOURCE" up
 
-echo "Inicializando app"
+echo "Initializing app"
 exec /app/main
