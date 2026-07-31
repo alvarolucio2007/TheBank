@@ -10,6 +10,8 @@ docker_build:
 	docker build -t thebank:latest .
 docker_run:
 	docker run --name thebank --network $(NETWORK_NAME) -p $(ENTRY_PORT) -e GIN_MODE=release -e DB_SOURCE="postgresql://root:secret@the_bank_db:5432/the_bank?sslmode=disable" thebank:latest
+docker_run_aws:
+	docker run -p 8080:8080 --env-file important.env thebank:latest
 postgres:
 	docker run --name the_bank_db --network the_bank_network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:18-alpine 
 postgres_create_db:
@@ -31,4 +33,4 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/alvarolucio2007/TheBank/db/sqlc Store
 
-.PHONY: migrateup migratedown sqlc test testrace server mock postgres network docker_build docker_run
+.PHONY: migrateup migratedown sqlc test testrace server mock postgres network docker_build docker_run docker_run_aws
